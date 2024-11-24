@@ -10,6 +10,10 @@ Generate the reference trajectory of the end-effector in 8 segments.
 7.Opening of the gripper.
 8.A trajectory to move the gripper back to the "standoff" configuration.
 """
+# To generate the csv file, call the function as shown in the comment, and then use np.savetxt to save the csv file.
+# configuration_list = TrajectoryGenerator(Tse_initial=Tse_initial, Tsc_initial=Tsc_initial, Tsc_final=Tsc_final, Tce_grasp=Tce_grasp, Tce_standoff=Tce_standoff)
+# np.savetxt("generated_trajectory.csv", configuration_list, delimiter=',')
+
 import numpy as np
 import modern_robotics as mr
 
@@ -93,5 +97,4 @@ def TrajectoryGenerator(Tse_initial, Tsc_initial, Tsc_final, Tce_grasp, Tce_stan
 
 configuration_list = TrajectoryGenerator(Tse_initial=Tse_initial, Tsc_initial=Tsc_initial, Tsc_final=Tsc_final, Tce_grasp=Tce_grasp, Tce_standoff=Tce_standoff)
 
-print(len(configuration_list))
 np.savetxt("generated_trajectory.csv", configuration_list, delimiter=',')
