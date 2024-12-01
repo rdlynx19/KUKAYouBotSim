@@ -5,7 +5,7 @@ import modern_robotics as mr
 
 def odometry(chassis_config, wheel_speeds, dt):
     """
-    Calculate the new chassis configuration using odometry
+    Calculate the new chassis configuration using odometry.
 
     :param chassis_config: current configuration of the chassis
     :param wheel_speeds: speed of the 4 wheels
@@ -14,12 +14,11 @@ def odometry(chassis_config, wheel_speeds, dt):
     r = 0.0475  # radius of the wheels
     l = 0.47/2  # half of forward backward distance between wheels
     w = 0.3/2   # half of side to side distance between wheels
-    F = (r/4) * np.array([
-        [-1/(l+w), 1/(l+w), 1/(l+w), -1/(l+w)], 
-        [1, 1, 1, 1], 
-        [-1, 1, -1, 1]])
+    F = (r/4) * np.array([[-1/(l+w), 1/(l+w), 1/(l+w), -1/(l+w)], 
+                        [1, 1, 1, 1], 
+                        [-1, 1, -1, 1]])
     Vb = np.matmul(F, (wheel_speeds*dt))
-    if Vb[0] == 0.0:
+    if Vb[0] < 1e-3:
         delta_phib = 0.0
         delta_xb = Vb[1]
         delta_yb = Vb[2]
@@ -53,7 +52,7 @@ def limit_speeds(robot_speeds, speed_limit):
 
     return robot_speeds
 
-def NextState(current_config, wheel_joint_speeds, dt, speed_limit):
+def NextState(current_config, wheel_joint_speeds, dt, speed_limit = 5.0):
     """
     :param current_config: 12 vector representing current configuration of the robot (chassis, arm and wheel angles)
     :param wheel_joint_speeds: 9 vector representing the wheel and arm joints speeds
@@ -63,13 +62,16 @@ def NextState(current_config, wheel_joint_speeds, dt, speed_limit):
     """
     chassis_config = current_config[0:3]
     arm_joint_angles = current_config[3:8]
-    joint_speeds = limit_speeds(wheel_joint_speeds[4:9], speed_limit=speed_limit)
+    joint_speeds = limit_speeds(
+        wheel_joint_speeds[4:9], speed_limit)
     new_arm_joint_angles = arm_joint_angles + (joint_speeds * dt)
     wheel_angles = current_config[8:12]
-    wheel_speeds = limit_speeds(wheel_joint_speeds[0:4], speed_limit=speed_limit)
+    wheel_speeds = limit_speeds(
+        wheel_joint_speeds[0:4], speed_limit)
     new_wheel_angles = wheel_angles + (wheel_speeds * dt)
-    new_chassis_config = odometry(chassis_config=chassis_config, wheel_speeds=wheel_speeds, dt=dt)
-    new_robot_config = np.hstack((new_chassis_config, new_arm_joint_angles, new_wheel_angles))
+    new_chassis_config = odometry(chassis_config, wheel_speeds, dt)
+    new_robot_config = np.hstack(
+        (new_chassis_config, new_arm_joint_angles, new_wheel_angles))
 
     return new_robot_config
 
